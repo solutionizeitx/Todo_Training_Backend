@@ -1,5 +1,5 @@
 """
-URL configuration for todo2 project.
+URL configuration for Todo project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.2/topics/http/urls/
@@ -18,8 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from django.conf.urls import include
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('todo/', include('todoapp2.urls'))
+    path('todo/', include('Todoapp.urls')),
 ]
