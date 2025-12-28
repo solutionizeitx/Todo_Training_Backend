@@ -1,0 +1,106 @@
+Token Authentication in djangorestframework
+===========================================
+
+1 - Make model changes
+-------------------------
+
+2 - Add rest_framework.authtoken to INSTALLED_APPS in settings.py
+-------------------------
+
+'rest_framework.authtoken',
+
+
+3 - Migrate changes
+-------------------------
+
+4 - Simple User Register 
+-------------------------
+
+from django.contrib.auth.models import User
+
+class UserRegisterAPIView(ListAPIView):
+    def post(self, request):
+        username = self.request.data.get('username')
+        password = self.request.data.get('password')
+
+        user_obj = User.objects.create_user(username= username, password= password)
+        user_obj.save()
+        return Response(
+            {
+                'message': 'User created successfully'
+            }
+        )
+
+5 - Simple User Login
+----------------------
+
+from django.contrib.auth.hashers import check_password, make_password
+
+
+class LoginAPIView(ListAPIView):
+    def post(self, request):
+        try:
+            username = self.request.data.get('username')
+            password = self.request.data.get('password')
+
+            user_obj = User.objects.filter(username=username).first()
+
+            token_obj = user_obj.check_password(password)
+
+
+        except User.DoesNotExist:
+            return Response(
+                {
+                    'message': 'Invalid credentials'
+                }
+            )
+        except Exception as e:
+            return Response(
+                {
+                    'message': 'Something went wrong',
+                    'error': str(e)
+                }
+            )
+
+
+6 - Simple User Logout
+----------------------
+
+from rest_framework.generics import ListAPIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
+
+class LogoutAPIView(ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        try:
+            user = request.user
+        
+            token, created = Token.objects.get_or_create(user=user)
+            token.delete()
+            return Response(
+                {
+                    'message': 'Logout successful'
+                }
+            )
+
+
+        except User.DoesNotExist:
+            return Response(
+                {
+                    'message': 'Invalid credentials'
+                }
+            )
+        except Exception as e:
+            return Response(
+                {
+                    'message': 'Something went wrong',
+                    'error': str(e)
+                }
+            )
+
+

@@ -7,3 +7,5 @@ xmedia
 staticfiles
 
 *.dump
+
+*.pyc
