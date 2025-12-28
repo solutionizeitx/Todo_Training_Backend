@@ -1,6 +1,9 @@
 /venv
 *\pycache*
+
 db.sqlite3
+*.sqlite3
+
 .env
 media
 xmedia
