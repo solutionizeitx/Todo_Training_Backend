@@ -1,22 +1,20 @@
-Token Authentication in djangorestframework
+# Token Authentication in djangorestframework
 ===========================================
 
-1 - Make model changes
+# 1 - Make model changes
 -------------------------
 
-2 - Add rest_framework.authtoken to INSTALLED_APPS in settings.py
+# 2 - Add rest_framework.authtoken to INSTALLED_APPS in settings.py
 -------------------------
 
 'rest_framework.authtoken',
 
 
-3 - Migrate changes
+# 3 - Migrate changes
 -------------------------
 
-4 - Simple User Register 
+# 4 - Simple User Register 
 -------------------------
-
-from django.contrib.auth.models import User
 
 class UserRegisterAPIView(ListAPIView):
     def post(self, request):
@@ -31,11 +29,8 @@ class UserRegisterAPIView(ListAPIView):
             }
         )
 
-5 - Simple User Login
+# 5 - Simple User Login
 ----------------------
-
-from django.contrib.auth.hashers import check_password, make_password
-
 
 class LoginAPIView(ListAPIView):
     def post(self, request):
@@ -63,15 +58,8 @@ class LoginAPIView(ListAPIView):
             )
 
 
-6 - Simple User Logout
+# 6 - Simple User Logout
 ----------------------
-
-from rest_framework.generics import ListAPIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
-from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
 
 class LogoutAPIView(ListAPIView):
     authentication_classes = [TokenAuthentication]
@@ -104,3 +92,12 @@ class LogoutAPIView(ListAPIView):
             )
 
 
+## Imports
+
+from django.contrib.auth.hashers import check_password, make_password
+from rest_framework.generics import ListAPIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
