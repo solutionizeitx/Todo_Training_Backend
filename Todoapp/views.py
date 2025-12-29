@@ -4,14 +4,25 @@ from rest_framework.response import Response
 
 from Todoapp.models import Todo_item
 from Todoapp.serializer import Todo_item_serializer
+from django.contrib.auth.models import User
+
+from django.contrib.auth.hashers import check_password, make_password
+from rest_framework.authtoken.models import Token
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 
 # Create your views here.
 class Todo_item_view(ListAPIView):
     serializer_class = Todo_item_serializer
     model_name = Todo_item
 
+    authentication_classes = [TokenAuthentication,]
+    permission_classes = [IsAuthenticated,]
+
     def get_queryset(self):
-        qs = self.model_name.objects.all()
+        print("Request user:", self.request.user)
+        qs = self.model_name.objects.filter(created_by=self.request.user)
         return qs
     
     def post(self, request):
@@ -31,7 +42,7 @@ class Todo_item_view(ListAPIView):
 
 
         serializer_obj.is_valid(raise_exception= True)
-        serializer_obj.save()
+        serializer_obj.save(created_by=self.request.user)
 
         return Response(
             {
@@ -53,3 +64,90 @@ class Todo_item_view(ListAPIView):
                 'message': 'deleted successfully'
             }
         )
+    
+
+class UserRegisterAPIView(ListAPIView):
+    def post(self, request):
+        username = self.request.data.get('username')
+        password = self.request.data.get('password')
+
+        user_obj = User.objects.create_user(username= username, password= password)
+        user_obj.save()
+        return Response(
+            {
+                'message': 'User created successfully'
+            }
+        )
+
+
+class LoginAPIView(ListAPIView):
+    def post(self, request):
+        try:
+            username = self.request.data.get('username')
+            password = self.request.data.get('password')
+
+            user_obj = User.objects.get(username=username)
+
+            is_valid = user_obj.check_password(password)
+
+            if is_valid:
+                token_obj, is_created = Token.objects.get_or_create(user=user_obj)
+                print("token_obj:", token_obj.key)
+                print("token_obj:", is_created)
+                return Response(
+                    {
+                        'message': 'Login successful',
+                        'token': f"Token {token_obj.key}"
+                    }
+                )
+
+            return Response(
+                {
+                    'message':  'Invalid credentials'
+                }
+            )
+
+        except User.DoesNotExist:
+            return Response(
+                {
+                    'message': 'Invalid credentials'
+                }
+            )
+        except Exception as e:
+            return Response(
+                {
+                    'message': 'Something went wrong',
+                    'error': str(e)
+                }
+            )
+
+
+class LogoutAPIView(ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        try:
+            user = request.user
+        
+            token, created = Token.objects.get_or_create(user=user)
+            token.delete()
+            return Response(
+                {
+                    'message': 'Logout successful'
+                }
+            )
+
+
+        except User.DoesNotExist:
+            return Response(
+                {
+                    'message': 'Invalid credentials'
+                }
+            )
+        except Exception as e:
+            return Response(
+                {
+                    'message': 'Something went wrong',
+                    'error': str(e)
+                }
+            )
